@@ -1,0 +1,8 @@
+# This file is being maintained by Puppet.
+# DO NOT EDIT
+
+postmaster OK
+hostmaster OK
+webmaster  OK
+www        OK
+abuse      OK

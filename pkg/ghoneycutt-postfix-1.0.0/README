@@ -1,0 +1,13 @@
+postfix
+
+Released 20100629 - Garrett Honeycutt - GPLv2
+
+postfix            - base class common for all postfix types
+postfix::client    - used on all clients
+postfix::rt        - mail server for RT (Request Tracker)
+postfix::pflogsumm - pflogsumm for postfix stats
+
+
+This class needs to be refactored. There are a lot of things going on in this module
+that I am not too pleased with, however it does work quite well and has been used in
+many production environments.

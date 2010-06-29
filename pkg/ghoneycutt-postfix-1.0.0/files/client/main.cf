@@ -1,0 +1,23 @@
+# This file is being maintained by Puppet.
+# DO NOT EDIT
+
+# See /usr/share/postfix/main.cf.dist for a commented, more complete version
+
+smtpd_banner = $myhostname ESMTP $mail_name
+biff = no
+
+append_dot_mydomain = no
+
+# this will add 'POP.yourdomain.tld' to the domain
+sender_canonical_maps = regexp:/etc/postfix/sender_regexp
+
+# Uncomment the next line to generate "delayed mail" warnings
+#delay_warning_time = 4h
+
+alias_maps = hash:/etc/postfix/aliases
+alias_database = hash:/etc/postfix//aliases
+myorigin = yourdomain.tld
+#relayhost = smtpproxy
+recipient_delimiter = +
+inet_interfaces = 127.0.0.1
+local_transport = error:local delivery is disabled

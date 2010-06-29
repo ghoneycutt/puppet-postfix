@@ -1,0 +1,7 @@
+# This file is being maintained by Puppet.
+# DO NOT EDIT
+
+# Sender mappings
+
+# Rewrite senders to the local hostname
+/(.*)@(.*)/             $1@<%= fqdn %>
