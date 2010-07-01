@@ -15,7 +15,6 @@
     "spec/spec_helper.rb": "ca19ec4f451ebc7fdb035b52eae6e909",
     "files/rt/master.cf-CentOS": "8614f017ac50718b66b81ad357263bd2",
     "files/client/main.cf": "74bd324e248bd2784136fb781028b711",
-    "manifests/header": "10e503a7244855fa06c54f09c59e2852",
     "files/client/master.cf-CentOS": "c9f258975fd6c0828851ed1aac1a66ea",
     "templates/client-sender_regexp.erb": "e1857cc04c882396d73426a9cebb08be",
     "README": "58eaa26fcfc0d19cf740131df31df2a9",
