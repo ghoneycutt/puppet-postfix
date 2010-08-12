@@ -1,0 +1,34 @@
+{
+  "checksums": {
+    "spec/spec_helper.rb": "ca19ec4f451ebc7fdb035b52eae6e909",
+    "files/rt/master.cf-CentOS": "8614f017ac50718b66b81ad357263bd2",
+    "files/client/main.cf": "74bd324e248bd2784136fb781028b711",
+    "files/client/master.cf-CentOS": "c9f258975fd6c0828851ed1aac1a66ea",
+    "CHANGELOG": "c1c926302b2ab4ee2933505c0a190cc0",
+    "templates/client-sender_regexp.erb": "e1857cc04c882396d73426a9cebb08be",
+    "README": "97bd0ac7997756fdb261c70d9914c42a",
+    "files/rt/main.cf": "ce003dedb13963eedd36f93f3ffeb0c5",
+    "files/roleaccount_exceptions": "e2ebc5e626e9c3e39a3b34002b9186f1",
+    "tests/init.pp": "1dfb2eb3d2e04f3446c1eb98ef94ebc6",
+    "templates/aliases.erb": "ad318b92122dcaf8cb98b299a5113abc",
+    "spec/spec.opts": "a600ded995d948e393fbe2320ba8e51c",
+    "metadata.json": "d34d0b70aba36510fbc2df4e667479ef",
+    "Modulefile": "26fd4a154924a504226e9a97c67e5214",
+    "manifests/init.pp": "eeb34665668698459cce44c523c495c8"
+  },
+  "version": "1.0.1",
+  "dependencies": [
+    {
+      "version_requirement": ">= 1.0.0",
+      "name": "ghoneycutt/generic"
+    },
+    {
+      "version_requirement": ">= 1.0.0",
+      "name": "ghoneycutt/puppet"
+    }
+  ],
+  "name": "ghoneycutt-postfix",
+  "types": [
+
+  ]
+}

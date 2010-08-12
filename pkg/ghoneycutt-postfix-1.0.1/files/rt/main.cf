@@ -1,0 +1,226 @@
+# This file is being maintained by Puppet.
+# DO NOT EDIT
+
+# See /usr/share/postfix/main.cf.dist for a commented, more complete version
+
+# The default is to use the fully-qualified domain name from gethostname()
+myhostname = rt.yourdomain.tld
+mydestination = localhost.$mydomain, localhost, $myhostname
+mydomain = rt.yourdomain.tld
+myorigin = rt.yourdomain.tld
+relay_domains = $mydestination, $mynetworks
+smtpd_banner = $myhostname ESMTP
+
+# biff isn't useful without local users, so turn off
+biff = no
+
+# The bellow will add 'yourdomain.tld' for the domain, not including the POP
+append_dot_mydomain = no
+
+# this will add 'POP.yourdomain.tld' to the domain
+sender_canonical_maps = regexp:/etc/postfix/sender_regexp
+
+# Uncomment the next line to generate "delayed mail" warnings
+#delay_warning_time = 4h
+
+# we need at least a minimal aliases file to deal with
+# getting 'postmaster' relayed inward
+alias_maps = hash:/etc/postfix/aliases, hash:/home/rt/aliases
+alias_database = hash:/etc/postfix/aliases, hash:/home/rt/aliases
+#alias_maps = hash:/etc/postfix/aliases
+#alias_database = hash:/etc/postfix/aliases
+
+# RFC says HELO is required; enforce that.
+smtpd_helo_required = yes
+
+# do not allow address verification; nobody legitimate has need of
+# this on these servers
+disable_vrfy_command = yes
+
+# Disable ETRN service
+smtpd_etrn_restrictions = reject
+fast_flush_domains =
+
+# don't advertise etrn and dsn
+smtpd_discard_ehlo_keywords = silent-discard, etrn, dsn
+
+# 20MB message size limit
+message_size_limit = 20480000
+
+# let these maps use proxymap, including smtpd_recipient_restrictions which is 
+# not permitted by default
+proxy_read_maps = $local_recipient_maps $mydestination $virtual_alias_maps $virtual_alias_domains $virtual_mailbox_maps $virtual_mailbox_domains $relay_recipient_maps $relay_domains $canonical_maps $sender_canonical_maps $recipient_canonical_maps $relocated_maps $transport_maps $mynetworks $smtpd_recipient_restrictions
+
+# if enabled i get 554 5.7.1 <rt@rt.yourdomain.tld>: Recipient address rejected: Access denied
+# if disabled i get 550 550 5.1.1 <it@rt.yourdomain.tld>: Recipient address rejected: local delivery is disabled (state 14)
+virtual_alias_maps = hash:/etc/postfix/virtual
+virtual_alias_domains = dfw1.yourdomain.tld
+
+# used for mailman
+recipient_delimiter = +
+#local_transport = error:local delivery is disabled
+local_transport = local:$myhostname
+
+# default style is subnet
+mynetworks_style = subnet
+mynetworks = 127.0.0.0/8, 10.1.0.0/16
+
+#transport_maps = hash:/etc/postfix/transport
+
+###################
+# server-side TLS #
+###################
+
+# enable server-side TLS
+#smtpd_tls_security_level = may
+#smtpd_tls_key_file = /etc/postfix/certs/some.key
+#smtpd_tls_cert_file = /etc/postfix/certs/some.cert
+#smtpd_tls_session_cache_database = btree:/etc/postfix/smtpd_scache
+
+#smtpd_use_tls = yes
+#smtp_tls_note_starttls_offer = yes
+#smtpd_tls_key_file = /etc/postfix/ssl/your.key
+#smtpd_tls_cert_file = /etc/postfix/ssl/your.crt
+#smtpd_tls_CAfile = /etc/postfix/ssl/your.ca
+#
+#smtpd_tls_loglevel = 1
+#smtpd_tls_received_header = yes
+#tls_random_source = dev:/dev/urandom
+
+###################
+# client-side TLS #
+###################
+smtp_use_tls = yes
+# set to 0 for production
+smtp_tls_loglevel = 1
+
+#########
+# SMTPD #
+#########
+
+# send mail through amavis
+content_filter = smtp-amavis:[127.0.0.1]:10024
+
+smtpd_recipient_restrictions =
+    # Reject the request when the hostname in the client HELO (EHLO) command has
+    # no DNS A or MX record. The unknown_hostname_reject_code specifies the
+    # response code to rejected requests (default: 450).
+    reject_unknown_hostname,
+
+    # recipient address must be fully qualified:
+    reject_non_fqdn_recipient,
+
+    # sender address myst be fully qualified:
+    reject_non_fqdn_sender,
+
+    # sender domain must have DNS A or MX record:
+    reject_unknown_sender_domain,
+
+    # recipient domain must have DNS A or MX record:
+    reject_unknown_recipient_domain,
+
+    # reject from addresses on our block list
+    #check_sender_access hash:/etc/postfix/mail_access,
+
+    # relay for our nets
+    permit_mynetworks,
+
+    # deny anything that's not to a domain we feel responsible for:
+    reject_unauth_destination,
+
+    # allow required role account addresses
+    check_recipient_access hash:/etc/postfix/roleaccount_exceptions,
+
+    # allow these 'from' addresses to bypass greylisting
+    #check_sender_access hash:/etc/postfix/whitelist_from,
+
+    # allow these 'to' addresses to bypass greylisting
+    #check_recipient_access hash:/etc/postfix/whitelist_to,
+
+    # initial check for valid recipient address
+    reject_unlisted_recipient,
+
+    # run through greylisting
+    check_policy_service inet:127.0.0.1:2501,
+
+    # see if we have a valid 'to' address
+    #check_recipient_access proxy:ldap:/etc/postfix/ldap-recipient-check.cf
+
+    # or is this address for a domain with catchall set
+    #check_recipient_access proxy:ldap:/etc/postfix/ldap-catchall-check.cf
+
+    # RBL's
+    reject_rbl_client b.barracudacentral.org,
+    reject_rbl_client sbl-xbl.spamhaus.org,
+
+    # if we made it this far, allow it
+    permit
+
+smtpd_client_restrictions =
+    # allow required role account addresses
+    check_recipient_access hash:/etc/postfix/roleaccount_exceptions
+
+    # deny connections to anyone whose IP is on our block-list:
+    #check_client_access hash:/etc/postfix/client_access
+
+    # deny connections from anyone who doesn't have a reverse DNS
+    # entry (NOTE - some mail servers would return a 550 for this
+    # match; unless otherwise configured postfix sends a 450):
+    reject_unknown_reverse_client_hostname
+
+smtpd_data_restrictions =
+    # reject overeager clients who start pipelining before we've told
+    # them they can; spammers sometimes do this to speed things up but
+    # nobody legitimate does so:
+    reject_unauth_pipelining,
+    # we expect nobody legitimate to be bouncing to more than one
+    # recipient at a time, so block anyone who tries to do that:
+    reject_multi_recipient_bounce,
+    # otherwise allow
+    permit
+
+#################################
+# Performance Tuning Parameters #
+#################################
+
+# let more than the default number of daemons run, so
+# we can handle more simultaneous inbound connections
+#default_process_limit = 512
+
+# The maximal number of message delivery requests that any client is allowed to
+# make to this service per minute
+#smtpd_client_message_rate_limit = 1000
+
+# The maximal number of message delivery requests that any client is allowed to
+# make to this service a minute
+#smtpd_client_new_tls_session_rate_limit = 100
+
+# The maximal number of connection attempts any client is allowed to make to
+# this service per minute
+#smtpd_client_connection_rate_limit = 1000
+
+# The maximal number of recipient addresses that any client is allowed to send
+# to this service per minute
+#smtpd_client_recipient_rate_limit = 1000
+
+# The expiration time of Postfix SMTP server TLS session cache information. 
+# 1 hour is the default below with a max of 24 hours as specified by RFC 2246
+smtpd_tls_session_cache_timeout = 3600s
+
+# limits the time of Postfix SMTP server write and read operations during
+# TLS startup and shutdown handshake procedures.
+smtpd_starttls_timeout = 300s
+
+# How long before smtp times out?
+# default is 30s - changed to 120s since some mail systems would sometimes take
+# that long to connect
+#smtp_connect_timeout = 120s
+
+# The maximal number of parallel deliveries to the same destination via the 
+# smtp message delivery transport. Default is 20. 
+smtp_destination_concurrency_limit = 100
+
+# The maximal number of parallel deliveries to the same destination
+# via the relay message delivery transport. Default is 20.
+relay_destination_concurrency_limit = 100
+
